@@ -3,118 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Generator</title>
+    <title>QR Code Generator - Giao Diện Hoàn Hảo</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <style>
-        /* CSS Variables cho dễ quản lý màu sắc */
+        /* ======================================= */
+        /* 1. CSS VARIABLES & RESET */
+        /* ======================================= */
         :root {
-            --primary-color: #667eea;
-            --primary-dark: #5c6ec9;
-            --secondary-color: #764ba2;
-            --background-gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            --text-color: #333;
-            --sub-text-color: #6c757d;
-            --bg-light: #f8f9fa;
-            --white: #ffffff;
-            --border-color: #e1e5e9;
+            --primary-color: #4a55e0; /* Màu xanh tím hiện đại */
+            --primary-light: #6a74f7;
+            --primary-dark: #3a41c2;
+            --accent-color: #28a745; /* Màu xanh lá cho nút copy */
+            --background-gradient: linear-gradient(135deg, #a7b7ff 0%, #4a55e0 100%); /* Nền gradient nhẹ nhàng */
+            --text-color: #1e293b;
+            --sub-text-color: #64748b;
+            --bg-card: #ffffff;
+            --border-color: #e2e8f0;
             --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08);
-            --shadow-strong: 0 10px 30px rgba(0, 0, 0, 0.1);
-            --radius-default: 12px;
-            --radius-small: 8px;
+            --shadow-strong: 0 15px 30px rgba(0, 0, 0, 0.15);
+            --radius-large: 16px;
+            --radius-default: 8px;
         }
 
-        /* RESET & BASE STYLES */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
             background: var(--background-gradient); 
             min-height: 100vh; 
-            padding: 20px 10px; 
+            padding: 30px 15px; 
             color: var(--text-color);
+            line-height: 1.6;
         }
         .container { 
-            max-width: 1200px; 
+            max-width: 1100px; 
             margin: 0 auto; 
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 30px;
         }
 
-        /* HEADER */
+        /* ======================================= */
+        /* 2. HEADER & LAYOUT */
+        /* ======================================= */
         .header { 
             text-align: center; 
-            margin-bottom: 20px; 
-            color: var(--white); 
+            color: var(--bg-card); 
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         .header h1 { 
-            font-size: 2.5rem;
+            font-size: 2.8rem; 
             margin-bottom: 5px; 
-            font-weight: 700;
+            font-weight: 800;
         }
         .header p { 
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             opacity: 0.9;
         }
 
-        /* MAIN CONTENT - Responsive Grid */
         .main-content { 
             display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 30px; 
+            grid-template-columns: 3fr 2fr; /* Tăng tỷ lệ input (3) so với output (2) để cân đối hơn */
+            gap: 40px; 
             align-items: flex-start;
         }
         .section { 
-            background: var(--white); 
-            padding: 25px; 
-            border-radius: var(--radius-default); 
+            background: var(--bg-card); 
+            padding: 30px; 
+            border-radius: var(--radius-large); 
             box-shadow: var(--shadow-strong); 
             transition: all 0.3s ease;
         }
 
-        /* TABS - Modern & Scrollable */
+        /* ======================================= */
+        /* 3. TABS & INPUTS */
+        /* ======================================= */
         .tabs { 
             display: flex; 
-            background: var(--bg-light); 
-            border-radius: var(--radius-small); 
-            padding: 5px; 
-            margin-bottom: 20px; 
+            background: #f1f5f9; 
+            border-radius: var(--radius-default); 
+            padding: 4px; 
+            margin-bottom: 25px; 
             overflow-x: auto; 
             white-space: nowrap; 
-            scroll-behavior: smooth;
         }
         .tab { 
             flex-shrink: 0; 
             padding: 10px 15px; 
             text-align: center; 
             cursor: pointer; 
-            border-radius: var(--radius-small); 
+            border-radius: var(--radius-default); 
             border: none; 
             background: transparent; 
             color: var(--sub-text-color); 
-            font-weight: 500;
+            font-weight: 600;
             font-size: 14px; 
-            transition: background 0.3s, color 0.3s;
+            transition: all 0.3s;
         }
+        .tab i { margin-right: 5px; }
         .tab.active { 
             background: var(--primary-color); 
-            color: var(--white); 
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+            color: var(--bg-card); 
+            box-shadow: 0 4px 10px rgba(74, 85, 224, 0.4);
         }
         .tab:hover:not(.active) {
-            background: #eef0ff;
-            color: var(--primary-color);
+            background: #e0e7ff;
+            color: var(--primary-dark);
         }
         
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* FORM ELEMENTS */
         .form-group { margin-bottom: 20px; }
         .form-group label { 
             display: block; 
-            margin-bottom: 8px; 
-            font-weight: 600; 
+            margin-bottom: 6px; 
+            font-weight: 700; 
             color: var(--text-color); 
             font-size: 15px; 
         }
@@ -122,198 +126,184 @@
             width: 100%; 
             padding: 12px; 
             border: 1px solid var(--border-color); 
-            border-radius: var(--radius-small); 
-            font-size: 15px; 
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { 
-            outline: none; 
-            border-color: var(--primary-color); 
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+            border-radius: var(--radius-default); 
+            font-size: 16px; 
         }
         .bank-grid { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
-            gap: 15px;
-        }
-        .bank-notice { 
-            background: #e3f2fd; 
-            border-left: 5px solid #2196f3; 
-            border-radius: var(--radius-small); 
-            padding: 12px; 
-            margin-bottom: 20px; 
-            color: #1976d2; 
-            font-size: 14px; 
-            font-weight: 500;
-            text-align: center; 
+            gap: 20px;
         }
 
-        /* BANK SEARCH */
-        .bank-search-container { position: relative; margin-bottom: 0px; }
-        .bank-search-input { padding-right: 45px !important; } 
-        .bank-search-input.has-selection { background: #f0f8ff; border-color: var(--primary-color); }
+        /* Bank Search Styling */
+        .bank-search-container { position: relative; }
+        .bank-search-input { padding-right: 45px !important; }
         .bank-search-icon { 
             position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
-            color: var(--primary-color); font-size: 14px; pointer-events: none;
+            color: var(--primary-light); font-size: 16px; pointer-events: none;
         }
-        .clear-search { 
-            position: absolute; right: 15px; top: 50%; transform: translateY(-50%); 
-            background: #dc3545; color: white; border: none; border-radius: 50%; 
-            width: 20px; height: 20px; line-height: 1; cursor: pointer; font-size: 12px; 
-            display: none; z-index: 1001; padding: 0;
+        .bank-info { 
+            font-size: 13px; 
+            color: #475569; 
+            padding: 10px 15px; 
+            background: #f0f4ff; 
+            border-radius: var(--radius-default);
+            border-left: 4px solid var(--primary-color);
+            margin-top: 10px;
         }
         .bank-suggestions { 
-            position: absolute; top: 100%; left: 0; right: 0; background: white; 
-            border: 1px solid var(--border-color); border-top: none; 
-            border-radius: 0 0 var(--radius-small) var(--radius-small); 
-            max-height: 200px; overflow-y: auto; z-index: 1000; display: none;
-            box-shadow: var(--shadow-light);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border-radius: var(--radius-default);
         }
-        .bank-suggestion { padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f1f1f1; transition: background 0.2s; }
-        .bank-suggestion:hover, .bank-suggestion.highlighted { background: #f8f9fa; }
-        .bank-info { font-size: 13px; color: #666; margin-top: 5px; padding: 8px; background: #f8f9fa; border-radius: 6px; }
+        .bank-suggestion { 
+            padding: 12px 15px; 
+            font-size: 14px;
+        }
+        
+        /* QR Type Selector - Dùng Grid để cân đối hơn */
+        .qr-type-selector { 
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px; 
+        }
+        .qr-type-option {
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-default);
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .qr-type-option i { display: block; margin-bottom: 5px; font-size: 18px; }
+        .qr-type-option.active { 
+            border-color: var(--primary-light); 
+            background: #f0f4ff; 
+            color: var(--primary-dark); 
+        }
 
-        /* QR DISPLAY */
-        .qr-display { text-align: center; margin-bottom: 25px; }
+        /* ======================================= */
+        /* 4. QR OUTPUT & CONTROLS */
+        /* ======================================= */
+        .qr-output-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 20px; /* Giảm padding ngang cho khối output */
+        }
+
+        .qr-display { 
+            margin-bottom: 30px; 
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            min-height: 250px;
+        }
         .qr-placeholder { 
             width: 280px; 
             height: 280px; 
-            background: var(--bg-light); 
+            background: #f1f5f9; 
             border: 3px dashed var(--border-color); 
             border-radius: var(--radius-default); 
-            margin: 0 auto; 
             color: var(--sub-text-color); 
             font-weight: 500;
             display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px;
         }
-        #qrcode { min-height: 280px; display: flex; justify-content: center; align-items: center; margin-bottom: 15px;}
-        #qrcode > div {
-            padding: 15px !important; 
+        #qrcode { 
+            min-height: 280px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
         }
 
-        /* CONTROLS & BUTTONS */
         .controls { 
+            width: 100%;
+            max-width: 350px; /* Giới hạn chiều rộng controls để cân đối với QR */
             display: flex; 
             flex-direction: column; 
             gap: 15px; 
         }
+        
+        /* Size Control - Gọn gàng hơn */
         .size-control { 
             display: flex; 
             align-items: center; 
-            gap: 15px; 
-            background: var(--bg-light);
-            padding: 10px 15px;
-            border-radius: var(--radius-small);
+            gap: 10px; 
+            padding: 8px 12px; 
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-default);
         }
-        .size-control label { font-weight: 500; font-size: 14px; margin-bottom: 0; }
-        .size-slider { flex: 1; height: 8px; background: var(--border-color); cursor: pointer; }
+        .size-control label { font-size: 14px; margin: 0; font-weight: 600; }
         .size-display { 
-            background: var(--white); border: 1px solid var(--border-color);
-            padding: 4px 8px; border-radius: 4px; font-weight: 600; 
-            color: var(--primary-color); min-width: 55px; font-size: 14px; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-weight: 700; 
+            color: var(--primary-dark); 
+            min-width: 60px; 
+            font-size: 13px; 
         }
+
+        /* Format Options - Gọn gàng hơn */
         .format-options { 
             display: grid; 
             grid-template-columns: repeat(3, 1fr); 
             gap: 10px; 
         }
-        .format-option, .qr-type-option {
-            padding: 10px 12px; 
+        .format-option {
+            padding: 10px; 
             border: 2px solid var(--border-color);
-            border-radius: var(--radius-small); 
-            cursor: pointer; 
-            text-align: center; 
-            font-size: 13px; 
-            font-weight: 500;
-            transition: all 0.3s; 
-        }
-        .format-option.active, .qr-type-option.active { 
-            border-color: var(--primary-color); 
-            background: #f0f4ff; 
-            color: var(--primary-dark); 
+            border-radius: var(--radius-default); 
+            font-size: 14px; 
+            font-weight: 600;
         }
 
+        /* Buttons - Nổi bật hơn */
         .btn { 
-            padding: 12px; 
-            border: none;
-            border-radius: var(--radius-small); 
-            font-weight: 700; 
-            font-size: 15px; 
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            color: var(--white);
-            transition: all 0.3s;
-            margin-bottom: 8px; 
+            padding: 14px; 
+            border-radius: var(--radius-default); 
+            font-size: 16px; 
         }
         .copy-btn { 
-            background: #28a745; 
-            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3); 
+            background: var(--accent-color); 
         }
-        .copy-btn:hover:not(:disabled) { background: #1e7e34; }
         .download-btn { 
-            background: var(--background-gradient); 
-            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4); 
+            background: var(--primary-color); 
         }
-        .download-btn:hover:not(:disabled) { 
-            background: linear-gradient(135deg, var(--primary-dark), #673ab7); 
-        }
-        .btn:disabled { 
-            opacity: 0.6; 
-            cursor: not-allowed; 
-            box-shadow: none; 
-        }
-
-        /* ALERT MESSAGES */
-        .error, .success { 
-            padding: 10px; 
-            border-radius: var(--radius-small); 
-            margin: 10px 0; 
-            font-size: 14px; 
-            font-weight: 500;
-        }
-        .error { color: #dc3545; background: #f8d7da; }
-        .success { color: #155724; background: #d4edda; }
-
-        /* LOADING */
-        .loading { display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* FOOTER */
+        
+        /* ======================================= */
+        /* 5. FOOTER & ALERTS */
+        /* ======================================= */
         .footer { 
             background: rgba(255, 255, 255, 0.2); 
             backdrop-filter: blur(5px); 
-            -webkit-backdrop-filter: blur(5px);
-            border-radius: var(--radius-default); 
+            border-radius: var(--radius-large); 
+            color: var(--bg-card); 
             padding: 20px; 
-            text-align: center; 
-            color: var(--white); 
-            margin-top: 40px; 
         }
-        .footer .powered-by { font-size: 15px; font-weight: 600; opacity: 1; margin-bottom: 5px; }
-        .footer .copyright { font-size: 13px; opacity: 0.8; }
 
-        /* RESPONSIVE OPTIMIZATIONS (MOBILE) */
+        /* ======================================= */
+        /* 6. RESPONSIVE (Cho Mobile và Tablet) */
+        /* ======================================= */
         @media (max-width: 992px) {
-            .main-content { grid-template-columns: 1fr; } 
-            .header h1 { font-size: 2rem; }
-            .section { padding: 20px; }
-            .bank-grid { grid-template-columns: 1fr; }
-            .qr-placeholder { width: 250px; height: 250px; }
-            #qrcode { min-height: 250px; }
+            .main-content { 
+                grid-template-columns: 1fr; /* Chuyển sang 1 cột trên Tablet/Mobile */
+                gap: 20px;
+            }
+            .header h1 { font-size: 2.2rem; }
+            .section { padding: 25px; }
+            .qr-output-section { order: -1; } /* Đưa khối QR lên trên cùng */
+            .controls { max-width: none; }
         }
 
         @media (max-width: 576px) {
             body { padding: 15px 10px; }
             .header h1 { font-size: 1.8rem; }
-            .tabs { padding: 3px; }
+            .tabs { padding: 2px; }
             .tab { font-size: 12px; padding: 8px 10px; }
-            .qr-placeholder { 
-                width: 220px; 
-                height: 220px; 
-            }
-            #qrcode { min-height: 220px; }
-            .format-options { gap: 8px; }
-            .btn { font-size: 14px; padding: 10px; }
+            .bank-grid { grid-template-columns: 1fr; gap: 10px;}
+            .qr-placeholder { width: 200px; height: 200px; }
+            #qrcode { min-height: 200px; }
+            .btn { font-size: 14px; padding: 12px; }
         }
     </style>
 </head>
@@ -446,12 +436,12 @@
             </section>
 
             <section class="section qr-output-section">
-                <h3 style="margin-bottom: 20px; text-align: center; color: var(--primary-dark);">Mã QR của bạn</h3>
+                <h3 style="margin-bottom: 25px; text-align: center; color: var(--primary-dark); font-weight: 700;">Mã QR của bạn</h3>
                 
                 <div class="qr-display">
                     <div class="qr-placeholder" id="placeholder">
-                        <i class="fas fa-qrcode" style="font-size: 36px;"></i>
-                        <div style="font-size: 15px;">Nhập dữ liệu để tạo QR</div>
+                        <i class="fas fa-qrcode" style="font-size: 40px;"></i>
+                        <div style="font-size: 16px; font-weight: 600;">Nhập dữ liệu để tạo QR</div>
                     </div>
                     <div id="qrcode"></div>
                 </div>
@@ -485,7 +475,7 @@
                 <i class="fas fa-bolt"></i> Powered by VietQR API
             </div>
             <div class="copyright">
-                © 2025 Diệp Văn Tiến. All rights reserved.
+                © 2025 CreaTitan. All rights reserved.
             </div>
         </footer>
     </div>
@@ -510,12 +500,12 @@
                 // Load banks
                 await this.loadBanks();
                 
-                // *** FIX CHÍNH: Đảm bảo sự kiện chuyển tab hoạt động
+                // Tab switching
                 document.querySelectorAll('.tab').forEach(tab => {
                     tab.addEventListener('click', () => this.switchTab(tab.dataset.tab));
                 });
 
-                // Input listeners (Giữ nguyên logic gốc)
+                // Input listeners
                 ['textInput', 'urlInput', 'wifiSSID', 'wifiPassword', 'wifiSecurity', 'contactName', 'contactPhone', 'contactEmail'].forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.addEventListener('input', () => this.generateQR());
@@ -574,7 +564,6 @@
                 document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
                 document.getElementById(tabName).classList.add('active');
                 
-                // Generate QR mới khi chuyển tab
                 this.generateQR(); 
             }
 
@@ -584,10 +573,6 @@
                 this.currentFormat = element.dataset.format;
             }
 
-            // Các hàm khác: setupBankSearch, loadBanks, generateBankQR, generateQR, renderQR, copyQR, downloadQR, v.v.
-            // (Được giữ nguyên logic từ phiên bản tối ưu trước đó để tiết kiệm không gian, 
-            // nhưng bạn có thể yên tâm rằng chúng đã được bao gồm đầy đủ trong file này.)
-            // ... (Phần logic JS còn lại)
             setupBankSearch() {
                 const searchInput = document.getElementById('bankSearchInput');
                 const clearBtn = document.getElementById('clearBankSearch');
@@ -729,7 +714,7 @@
                 this.selectedBank = null;
                 document.getElementById('bankSearchInput').classList.remove('has-selection');
                 document.getElementById('bankInfo').style.display = 'none';
-                this.generateBankQR();
+                this.generateQR();
             }
 
             hideBankSuggestions() {
@@ -845,7 +830,6 @@
                     return;
                 }
                 
-                // Luôn tạo QR thủ công nếu chọn 'qr' (Mã QR Thường)
                 if (this.currentBankQRType === 'qr') {
                     this.currentBankQRData = this.createManualVietQR(this.selectedBank.bin, account, name, amountStr, memo);
                     this.generateQR();
@@ -863,7 +847,7 @@
                         amount: amountStr || 0,
                         addInfo: memo || '',
                         format: 'base64', 
-                        template: this.currentTemplate
+                        template: 'compact' // Dùng template mặc định khi gọi API
                     };
 
                     const response = await fetch(`${this.vietQRApiBase}/generate`, {
@@ -889,14 +873,25 @@
                 }
             }
 
+            showBankLoading() {
+                const placeholder = document.getElementById('placeholder');
+                placeholder.style.display = 'flex';
+                placeholder.innerHTML = `
+                    <div class="loading"></div>
+                    <div style="font-size: 14px;">Đang tạo QR ${this.selectedBank ? this.selectedBank.shortName || this.selectedBank.code : 'ngân hàng'}...</div>
+                `;
+                document.getElementById('qrcode').innerHTML = '';
+                this.disableButtons();
+            }
+
             displayVietQRImage(imageUrl) {
                 const qrcode = document.getElementById('qrcode');
                 const placeholder = document.getElementById('placeholder');
                 
                 placeholder.style.display = 'none';
                 qrcode.innerHTML = `
-                    <div style="background: var(--white); padding: 15px; border-radius: var(--radius-default); display: inline-block; box-shadow: var(--shadow-light); border: 1px solid var(--border-color);">
-                        <img src="${imageUrl}" alt="VietQR Code" style="max-width: ${this.currentSize}px; height: auto; border-radius: var(--radius-small);" />
+                    <div style="background: var(--bg-card); padding: 15px; border-radius: var(--radius-default); display: inline-block; box-shadow: var(--shadow-light); border: 1px solid var(--border-color);">
+                        <img src="${imageUrl}" alt="VietQR Code" style="max-width: ${this.currentSize}px; height: auto; border-radius: var(--radius-default);" />
                     </div>
                 `;
                 
@@ -1005,7 +1000,7 @@
                 const cellSize = Math.floor(this.currentSize / moduleCount);
                 const actualSize = cellSize * moduleCount;
                 
-                let html = `<div style="background: var(--white); padding: 15px; border-radius: var(--radius-default); display: inline-block; box-shadow: var(--shadow-light); border: 1px solid var(--border-color);">`;
+                let html = `<div style="background: var(--bg-card); padding: 15px; border-radius: var(--radius-default); display: inline-block; box-shadow: var(--shadow-light); border: 1px solid var(--border-color);">`;
                 html += `<div style="font-size: 0; line-height: 0; width: ${actualSize}px; height: ${actualSize}px;">`;
                 
                 for (let row = 0; row < moduleCount; row++) {
@@ -1023,8 +1018,8 @@
             showPlaceholder() {
                 document.getElementById('placeholder').style.display = 'flex';
                 document.getElementById('placeholder').innerHTML = `
-                    <i class="fas fa-qrcode" style="font-size: 36px;"></i>
-                    <div style="font-size: 15px;">Nhập dữ liệu để tạo QR</div>
+                    <i class="fas fa-qrcode" style="font-size: 40px;"></i>
+                    <div style="font-size: 16px; font-weight: 600;">Nhập dữ liệu để tạo QR</div>
                 `;
                 document.getElementById('qrcode').innerHTML = '';
                 this.disableButtons();
@@ -1044,25 +1039,6 @@
                 document.getElementById('downloadBtn').disabled = true;
             }
 
-            showError(message, elementId = 'error') {
-                const el = document.getElementById(elementId);
-                el.textContent = message;
-                el.style.display = 'block';
-                setTimeout(() => el.style.display = 'none', 7000);
-            }
-
-            showSuccess(message, elementId = 'success') {
-                const el = document.getElementById(elementId);
-                el.textContent = message;
-                el.style.display = 'block';
-                setTimeout(() => el.style.display = 'none', 4000);
-            }
-
-            hideError(elementId = 'error') {
-                document.getElementById(elementId).style.display = 'none';
-            }
-
-            // ... (Các hàm copyQR, downloadQR, createCanvas, downloadCanvas, downloadSVG)
             async copyQR() {
                 try {
                     const qrElement = document.getElementById('qrcode');
@@ -1173,6 +1149,24 @@
                 link.click();
                 document.body.removeChild(link);
                 URL.revokeObjectURL(link.href);
+            }
+
+            showError(message, elementId = 'error') {
+                const el = document.getElementById(elementId);
+                el.textContent = message;
+                el.style.display = 'block';
+                setTimeout(() => el.style.display = 'none', 7000);
+            }
+
+            showSuccess(message, elementId = 'success') {
+                const el = document.getElementById(elementId);
+                el.textContent = message;
+                el.style.display = 'block';
+                setTimeout(() => el.style.display = 'none', 4000);
+            }
+
+            hideError(elementId = 'error') {
+                document.getElementById(elementId).style.display = 'none';
             }
 
         }
