@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator - Tối Ưu</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <style>
+        /* CSS Variables cho dễ quản lý màu sắc */
+        :root {
+            --primary-color: #667eea;
+            --primary-dark: #5c6ec9;
+            --secondary-color: #764ba2;
+            --background-gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            --text-color: #333;
+            --sub-text-color: #6c757d;
+            --bg-light: #f8f9fa;
+            --white: #ffffff;
+            --border-color: #e1e5e9;
+            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-strong: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --radius-default: 12px;
+            --radius-small: 8px;
+        }
+
+        /* RESET & BASE STYLES */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background: var(--background-gradient); 
+            min-height: 100vh; 
+            padding: 20px 10px; /* Thêm padding ngang cho mobile */
+            color: var(--text-color);
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* HEADER */
+        .header { 
+            text-align: center; 
+            margin-bottom: 20px; 
+            color: var(--white); 
+        }
+        .header h1 { 
+            font-size: 2.5rem; /* Lớn hơn trên PC */
+            margin-bottom: 5px; 
+            font-weight: 700;
+        }
+        .header p { 
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* MAIN CONTENT - Cải tiến Grid cho Responsive */
+        .main-content { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; /* Mặc định cho PC: 2 cột */
+            gap: 30px; 
+            align-items: flex-start; /* Giữ các section ở trên cùng */
+        }
+        .section { 
+            background: var(--white); 
+            padding: 25px; 
+            border-radius: var(--radius-default); 
+            box-shadow: var(--shadow-strong); 
+            transition: all 0.3s ease;
+        }
+
+        /* TABS - Modern & Scrollable */
+        .tabs { 
+            display: flex; 
+            background: var(--bg-light); 
+            border-radius: var(--radius-small); 
+            padding: 5px; 
+            margin-bottom: 20px; 
+            overflow-x: auto; /* Cho phép cuộn ngang trên Mobile */
+            white-space: nowrap; /* Ngăn cách tabs xuống dòng */
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+        .tab { 
+            flex-shrink: 0; /* Quan trọng cho scrollable tabs */
+            padding: 10px 15px; /* Tăng padding để dễ chạm hơn */
+            text-align: center; 
+            cursor: pointer; 
+            border-radius: var(--radius-small); 
+            border: none; 
+            background: transparent; 
+            color: var(--sub-text-color); 
+            font-weight: 500;
+            font-size: 14px; 
+            transition: background 0.3s, color 0.3s;
+        }
+        .tab.active { 
+            background: var(--primary-color); 
+            color: var(--white); 
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+        }
+        .tab:hover:not(.active) {
+            background: #eef0ff;
+            color: var(--primary-color);
+        }
+
+        /* FORM ELEMENTS - Tăng cường UX */
+        .form-group { margin-bottom: 20px; }
+        .form-group label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: 600; 
+            color: var(--text-color); 
+            font-size: 15px; 
+        }
+        .form-group input, .form-group select, .form-group textarea { 
+            width: 100%; 
+            padding: 12px; /* Tăng padding */
+            border: 1px solid var(--border-color); /* Giảm độ dày border */
+            border-radius: var(--radius-small); 
+            font-size: 15px; 
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { 
+            outline: none; 
+            border-color: var(--primary-color); 
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+        .bank-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; /* Tăng gap */
+        }
+        .bank-notice { 
+            background: #e3f2fd; 
+            border-left: 5px solid #2196f3; /* Dùng border-left nổi bật hơn */
+            border-radius: var(--radius-small); 
+            padding: 12px; 
+            margin-bottom: 20px; 
+            color: #1976d2; 
+            font-size: 14px; 
+            font-weight: 500;
+            text-align: center; 
+        }
+
+        /* BANK SEARCH - Cải thiện hiển thị */
+        .bank-search-container { position: relative; margin-bottom: 0px; }
+        .bank-search-input { padding-right: 45px !important; } /* Điều chỉnh để có chỗ cho icon và nút clear */
+        .bank-search-input.has-selection { background: #f0f8ff; border-color: var(--primary-color); }
+        .bank-search-icon { right: 15px !important; color: var(--primary-color) !important; font-size: 14px; }
+        .clear-search { 
+            right: 15px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            background: #dc3545; 
+            color: white; 
+            border: none; 
+            border-radius: 50%; 
+            width: 20px; /* Lớn hơn */
+            height: 20px; 
+            line-height: 1;
+            cursor: pointer; 
+            font-size: 12px; 
+            display: none;
+            position: absolute;
+            transition: all 0.2s;
+            z-index: 1001; /* Đảm bảo nằm trên input */
+            padding: 0;
+        }
+        .clear-search:hover { background: #c82333; }
+        .bank-suggestions { 
+            border-radius: 0 0 var(--radius-small) var(--radius-small); 
+            box-shadow: var(--shadow-light);
+        }
+        .bank-suggestion { padding: 10px 15px; } /* Tăng padding */
+        .bank-suggestion-details { font-size: 11px; }
+
+        /* QR DISPLAY */
+        .qr-display { text-align: center; margin-bottom: 25px; }
+        .qr-placeholder { 
+            width: 280px; 
+            height: 280px; 
+            background: var(--bg-light); 
+            border: 3px dashed var(--border-color); /* Tăng độ dày border */
+            border-radius: var(--radius-default); 
+            margin: 0 auto; 
+            color: var(--sub-text-color); 
+            font-weight: 500;
+        }
+        #qrcode { 
+            min-height: 280px; 
+            transition: all 0.3s;
+        }
+        #qrcode > div {
+            /* Style cho QR box khi hiển thị (từ JS) */
+            padding: 15px !important; 
+        }
+
+        /* CONTROLS & BUTTONS */
+        .controls { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; /* Tăng gap giữa các control */
+        }
+        .size-control { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            background: var(--bg-light);
+            padding: 10px 15px;
+            border-radius: var(--radius-small);
+        }
+        .size-control label { font-weight: 500; font-size: 14px; margin-bottom: 0; }
+        .size-slider { 
+            height: 8px; 
+            background: var(--border-color);
+            cursor: pointer;
+            flex: 1;
+        }
+        .size-display { 
+            background: var(--white); 
+            border: 1px solid var(--border-color);
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-weight: 600; 
+            color: var(--primary-color); 
+            min-width: 55px; 
+            font-size: 14px; 
+        }
+        .format-options { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); /* Dùng grid thay vì flex */
+            gap: 10px; 
+        }
+        .format-option, .qr-type-option, .template-option {
+            padding: 10px 12px; /* Tăng padding */
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-small); 
+            cursor: pointer; 
+            text-align: center; 
+            font-size: 13px; 
+            font-weight: 500;
+            transition: all 0.3s; 
+        }
+        .format-option.active, .qr-type-option.active, .template-option.active { 
+            border-color: var(--primary-color); 
+            background: #f0f4ff; 
+            color: var(--primary-dark); 
+        }
+
+        .btn { 
+            padding: 12px; /* Tăng padding */
+            border-radius: var(--radius-small); 
+            font-weight: 700; 
+            font-size: 15px; 
+            transition: all 0.3s;
+        }
+        .copy-btn { 
+            background: #28a745; 
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3); 
+        }
+        .copy-btn:hover:not(:disabled) { background: #1e7e34; }
+        .download-btn { 
+            background: var(--background-gradient); 
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4); 
+        }
+        .download-btn:hover:not(:disabled) { 
+            background: linear-gradient(135deg, var(--primary-dark), #673ab7); 
+        }
+        .btn:disabled { 
+            opacity: 0.6; 
+            cursor: not-allowed; 
+            box-shadow: none; 
+        }
+
+        /* ALERT MESSAGES */
+        .error, .success { 
+            padding: 10px; 
+            border-radius: var(--radius-small); 
+            margin: 10px 0; 
+            font-size: 14px; 
+            font-weight: 500;
+        }
+
+        /* FOOTER - Cải tiến hiệu ứng mờ */
+        .footer { 
+            background: rgba(255, 255, 255, 0.2); 
+            backdrop-filter: blur(5px); /* Giảm độ mờ */
+            -webkit-backdrop-filter: blur(5px);
+            border-radius: var(--radius-default); 
+            padding: 20px; 
+            text-align: center; 
+            color: var(--white); 
+            margin-top: 40px; 
+        }
+        .footer .powered-by { font-size: 15px; font-weight: 600; opacity: 1; margin-bottom: 5px; }
+        .footer .copyright { font-size: 13px; opacity: 0.8; }
+
+        /* RESPONSIVE OPTIMIZATIONS (MOBILE) */
+        @media (max-width: 992px) {
+            .main-content { grid-template-columns: 1fr; } /* Chuyển sang 1 cột trên tablet/mobile */
+            .header h1 { font-size: 2rem; }
+            .section { padding: 20px; }
+            .bank-grid { grid-template-columns: 1fr; } /* Bank inputs thành 1 cột */
+            .qr-placeholder { width: 250px; height: 250px; }
+            #qrcode { min-height: 250px; }
+            .template-grid { grid-template-columns: repeat(2, 1fr); } /* Template thành 2 cột */
+        }
+
+        @media (max-width: 576px) {
+            body { padding: 15px 10px; }
+            .header h1 { font-size: 1.8rem; }
+            .tabs { padding: 3px; }
+            .tab { font-size: 12px; padding: 8px 10px; }
+            .qr-placeholder { 
+                width: 220px; 
+                height: 220px; 
+                border-width: 2px;
+            }
+            #qrcode { min-height: 220px; }
+            .format-options, .template-grid { gap: 8px; }
+            .btn { font-size: 14px; padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-qrcode"></i> QR Code Generator</h1>
+            <p>Tạo mã QR miễn phí và dễ dàng</p>
+        </header>
+
+        <main class="main-content">
+            <section class="section">
+                <div class="tabs">
+                    <button class="tab active" data-tab="text" title="Tạo QR từ Văn bản"><i class="fas fa-font"></i> Text</button>
+                    <button class="tab" data-tab="url" title="Tạo QR từ Đường link"><i class="fas fa-link"></i> URL</button>
+                    <button class="tab" data-tab="wifi" title="Tạo QR kết nối WiFi"><i class="fas fa-wifi"></i> WiFi</button>
+                    <button class="tab" data-tab="contact" title="Tạo QR Card (vCard)"><i class="fas fa-user"></i> Contact</button>
+                    <button class="tab" data-tab="bank" title="Tạo QR chuyển khoản VietQR"><i class="fas fa-university"></i> 🇻🇳 Bank</button>
+                </div>
+
+                <div class="tab-content active" id="text">
+                    <div class="form-group">
+                        <label for="textInput">Nhập văn bản:</label>
+                        <textarea id="textInput" rows="4" placeholder="Nhập văn bản tại đây"></textarea>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="url">
+                    <div class="form-group">
+                        <label for="urlInput">Nhập URL:</label>
+                        <input type="url" id="urlInput" placeholder="https://example.com">
+                    </div>
+                </div>
+
+                <div class="tab-content" id="wifi">
+                    <div class="form-group">
+                        <label for="wifiSSID">Tên WiFi (SSID):</label>
+                        <input type="text" id="wifiSSID" placeholder="Tên mạng WiFi">
+                    </div>
+                    <div class="form-group">
+                        <label for="wifiPassword">Mật khẩu:</label>
+                        <input type="text" id="wifiPassword" placeholder="Mật khẩu WiFi">
+                    </div>
+                    <div class="form-group">
+                        <label for="wifiSecurity">Bảo mật:</label>
+                        <select id="wifiSecurity">
+                            <option value="WPA">WPA/WPA2</option>
+                            <option value="WEP">WEP</option>
+                            <option value="nopass">Không mật khẩu</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="contact">
+                    <div class="form-group">
+                        <label for="contactName">Họ tên:</label>
+                        <input type="text" id="contactName" placeholder="Nguyễn Văn A">
+                    </div>
+                    <div class="form-group">
+                        <label for="contactPhone">Số điện thoại:</label>
+                        <input type="tel" id="contactPhone" placeholder="0123456789">
+                    </div>
+                    <div class="form-group">
+                        <label for="contactEmail">Email:</label>
+                        <input type="email" id="contactEmail" placeholder="example@email.com">
+                    </div>
+                </div>
+
+                <div class="tab-content" id="bank">
+                    <div class="bank-notice">
+                        🇻🇳 **VietQR:** Tạo mã QR chuyển khoản ngân hàng Việt Nam.
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Loại mã QR:</label>
+                        <div class="qr-type-selector">
+                            <div class="qr-type-option active" data-type="qr" title="Mã QR do thư viện tạo">
+                                <i class="fas fa-qrcode"></i> Mã QR Thường
+                            </div>
+                            </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bankSearchInput">Tìm kiếm ngân hàng:</label>
+                        <div class="bank-search-container">
+                            <input 
+                                type="text" 
+                                id="bankSearchInput" 
+                                class="bank-search-input" 
+                                placeholder="Gõ tên ngân hàng, mã ngân hàng hoặc BIN..."
+                                autocomplete="off"
+                            >
+                            <button class="clear-search" id="clearBankSearch" title="Xóa">✕</button>
+                            <i class="fas fa-search bank-search-icon" style="right: 15px; pointer-events: none;"></i>
+                            <div class="bank-suggestions" id="bankSuggestions"></div>
+                        </div>
+                        <div class="bank-info" id="bankInfo" style="display: none;"></div>
+                    </div>
+
+                    <div class="bank-grid">
+                        <div class="form-group">
+                            <label for="bankAccount">Số tài khoản:</label>
+                            <input type="text" id="bankAccount" placeholder="1234567890" maxlength="20">
+                        </div>
+                        <div class="form-group">
+                            <label for="bankName">Tên chủ TK:</label>
+                            <input type="text" id="bankName" placeholder="NGUYEN VAN A">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bankAmount">Số tiền (VNĐ - để trống nếu không cần):</label>
+                        <input type="text" id="bankAmount" placeholder="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bankMemo">Nội dung chuyển khoản:</label>
+                        <textarea id="bankMemo" rows="2" placeholder="Thanh toán hóa đơn..." maxlength="50"></textarea>
+                    </div>
+
+                    <div class="error" id="bankError"></div>
+                    <div class="success" id="bankSuccess"></div>
+                </div>
+
+                <div class="error" id="error"></div>
+                <div class="success" id="success"></div>
+            </section>
+
+            <section class="section qr-output-section">
+                <h3 style="margin-bottom: 20px; text-align: center; color: var(--primary-dark);">Mã QR của bạn</h3>
+                
+                <div class="qr-display">
+                    <div class="qr-placeholder" id="placeholder">
+                        <i class="fas fa-qrcode" style="font-size: 36px;"></i>
+                        <div style="font-size: 15px;">Nhập dữ liệu để tạo QR</div>
+                    </div>
+                    <div id="qrcode"></div>
+                </div>
+
+                <div class="controls">
+                    <div class="size-control">
+                        <label for="sizeSlider"><i class="fas fa-ruler-combined"></i> Kích thước:</label>
+                        <input type="range" id="sizeSlider" class="size-slider" min="150" max="400" value="280">
+                        <div class="size-display" id="sizeDisplay">280px</div>
+                    </div>
+
+                    <div class="format-options">
+                        <div class="format-option active" data-format="png">PNG</div>
+                        <div class="format-option" data-format="jpg">JPG</div>
+                        <div class="format-option" data-format="svg">SVG</div>
+                    </div>
+
+                    <button class="btn copy-btn" id="copyBtn" disabled>
+                        <i class="fas fa-copy"></i> Copy Ảnh
+                    </button>
+
+                    <button class="btn download-btn" id="downloadBtn" disabled>
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <div class="powered-by">
+                <i class="fas fa-bolt"></i> Powered by VietQR API
+            </div>
+            <div class="copyright">
+                © 2025 Diệp Văn Tiến. All rights reserved.
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // *** Tối ưu hóa JavaScript: Giữ nguyên logic cốt lõi (rất tốt) và chỉ thay đổi nhẹ
+        //     để đồng bộ với thay đổi giao diện (VD: ẩn template selector).
+        
+        class QRApp {
+            constructor() {
+                this.currentQR = null;
+                this.currentSize = 280;
+                this.currentFormat = 'png';
+                this.currentBankQRType = 'qr';
+                this.currentTemplate = 'compact'; // Dù ẩn giao diện, vẫn giữ giá trị mặc định
+                this.banks = [];
+                this.selectedBank = null;
+                this.vietQRApiBase = 'https://api.vietqr.io/v2';
+                this.currentBankQRData = null;
+                this.highlightedIndex = -1;
+                this.init();
+            }
+
+            async init() {
+                await this.loadBanks();
+                
+                // Tab switching
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.addEventListener('click', () => this.switchTab(tab.dataset.tab));
+                });
+
+                // Input listeners
+                ['textInput', 'urlInput', 'wifiSSID', 'wifiPassword', 'wifiSecurity', 'contactName', 'contactPhone', 'contactEmail'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.addEventListener('input', () => this.generateQR());
+                });
+
+                // Bank inputs
+                ['bankAccount', 'bankName', 'bankAmount', 'bankMemo'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.addEventListener('input', () => this.generateBankQR());
+                });
+
+                // Bank search functionality
+                this.setupBankSearch();
+
+                // QR Type selector (Đã ẩn Deeplink, chỉ giữ QR Thường)
+                document.querySelectorAll('.qr-type-option').forEach(opt => {
+                    opt.addEventListener('click', () => this.setQRType(opt));
+                });
+
+                // Template selector (Đã ẩn)
+                // document.querySelectorAll('.template-option').forEach(opt => {
+                //     opt.addEventListener('click', () => this.setTemplate(opt));
+                // });
+
+                // Controls
+                document.getElementById('sizeSlider').addEventListener('input', (e) => {
+                    this.currentSize = parseInt(e.target.value);
+                    document.getElementById('sizeDisplay').textContent = `${this.currentSize}px`;
+                    this.generateQR();
+                });
+
+                document.querySelectorAll('.format-option').forEach(opt => {
+                    opt.addEventListener('click', () => this.setFormat(opt));
+                });
+
+                document.getElementById('copyBtn').addEventListener('click', () => this.copyQR());
+                document.getElementById('downloadBtn').addEventListener('click', () => this.downloadQR());
+
+                // Bank amount formatting
+                document.getElementById('bankAmount').addEventListener('input', (e) => {
+                    let val = e.target.value.replace(/[^\d]/g, '');
+                    if (val && val !== '0') {
+                        e.target.value = new Intl.NumberFormat('vi-VN').format(val);
+                    }
+                });
+
+                // Auto uppercase bank name
+                document.getElementById('bankName').addEventListener('input', (e) => {
+                    e.target.value = e.target.value.toUpperCase();
+                });
+
+                // Initial QR
+                this.generateQR();
+            }
+
+            // --- CÁC FUNCTION KHÁC GIỮ NGUYÊN LOGIC NHƯ CODE BAN ĐẦU ---
+
+            // Function setupBankSearch (giữ nguyên)
+            setupBankSearch() {
+                const searchInput = document.getElementById('bankSearchInput');
+                const clearBtn = document.getElementById('clearBankSearch');
+                const suggestionsEl = document.getElementById('bankSuggestions');
+
+                // Input event
+                searchInput.addEventListener('input', (e) => {
+                    const query = e.target.value.trim();
+                    clearBtn.style.display = query ? 'block' : 'none';
+                    
+                    if (query.length >= 1) {
+                        this.showBankSuggestions(query);
+                    } else {
+                        this.hideBankSuggestions();
+                        this.clearBankSelection();
+                    }
+                });
+
+                // Keyboard navigation
+                searchInput.addEventListener('keydown', (e) => {
+                    const suggestions = suggestionsEl.querySelectorAll('.bank-suggestion:not(.no-suggestions)');
+                    
+                    switch(e.key) {
+                        case 'ArrowDown':
+                            e.preventDefault();
+                            this.highlightedIndex = Math.min(this.highlightedIndex + 1, suggestions.length - 1);
+                            this.updateHighlight();
+                            break;
+                        case 'ArrowUp':
+                            e.preventDefault();
+                            this.highlightedIndex = Math.max(this.highlightedIndex - 1, -1);
+                            this.updateHighlight();
+                            break;
+                        case 'Enter':
+                            e.preventDefault();
+                            if (this.highlightedIndex >= 0 && suggestions[this.highlightedIndex]) {
+                                this.selectBank(suggestions[this.highlightedIndex].dataset.bankData);
+                            }
+                            break;
+                        case 'Escape':
+                            this.hideBankSuggestions();
+                            searchInput.blur();
+                            break;
+                    }
+                });
+
+                // Clear button
+                clearBtn.addEventListener('click', () => {
+                    searchInput.value = '';
+                    clearBtn.style.display = 'none';
+                    this.hideBankSuggestions();
+                    this.clearBankSelection();
+                    searchInput.focus();
+                });
+
+                // Click outside to close
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.bank-search-container')) {
+                        this.hideBankSuggestions();
+                    }
+                });
+            }
+
+            showBankSuggestions(query) {
+                const suggestionsEl = document.getElementById('bankSuggestions');
+                const filteredBanks = this.searchBanks(query);
+                
+                if (filteredBanks.length === 0) {
+                    suggestionsEl.innerHTML = '<div class="no-suggestions">Không tìm thấy ngân hàng phù hợp</div>';
+                } else {
+                    suggestionsEl.innerHTML = filteredBanks.map((bank, index) => `
+                        <div class="bank-suggestion" data-bank-data='${JSON.stringify(bank)}' onclick="qrApp.selectBank('${encodeURIComponent(JSON.stringify(bank))}')">
+                            <div class="bank-suggestion-main">${this.highlightMatch(bank.shortName || bank.code, query)} - ${this.highlightMatch(bank.name, query)}</div>
+                            <div class="bank-suggestion-details">BIN: ${this.highlightMatch(bank.bin, query)} | Code: ${this.highlightMatch(bank.code, query)}</div>
+                        </div>
+                    `).join('');
+                }
+                
+                suggestionsEl.style.display = 'block';
+                this.highlightedIndex = -1;
+            }
+
+            searchBanks(query) {
+                const normalizedQuery = this.removeVietnameseAccents(query.toLowerCase());
+                
+                return this.banks.filter(bank => {
+                    const searchableText = [
+                        bank.name,
+                        bank.shortName || '',
+                        bank.code,
+                        bank.bin
+                    ].map(text => this.removeVietnameseAccents(text.toLowerCase())).join(' ');
+                    
+                    return searchableText.includes(normalizedQuery);
+                }).slice(0, 8); // Limit to 8 results
+            }
+
+            highlightMatch(text, query) {
+                if (!query) return text;
+                
+                const normalizedText = this.removeVietnameseAccents(text.toLowerCase());
+                const normalizedQuery = this.removeVietnameseAccents(query.toLowerCase());
+                const index = normalizedText.indexOf(normalizedQuery);
+                
+                if (index >= 0) {
+                    return text.substring(0, index) + 
+                            `<span class="bank-suggestion-match">${text.substring(index, index + query.length)}</span>` + 
+                            text.substring(index + query.length);
+                }
+                
+                return text;
+            }
+
+            updateHighlight() {
+                const suggestions = document.querySelectorAll('.bank-suggestion:not(.no-suggestions)');
+                suggestions.forEach((el, index) => {
+                    el.classList.toggle('highlighted', index === this.highlightedIndex);
+                });
+            }
+
+            selectBank(bankDataStr) {
+                const bank = JSON.parse(decodeURIComponent(bankDataStr));
+                this.selectedBank = bank;
+                
+                const searchInput = document.getElementById('bankSearchInput');
+                const bankInfo = document.getElementById('bankInfo');
+                const clearBtn = document.getElementById('clearBankSearch');
+                
+                // Update input
+                searchInput.value = `${bank.shortName || bank.code} - ${bank.name}`;
+                searchInput.classList.add('has-selection');
+                clearBtn.style.display = 'block';
+                
+                // Update bank info
+                bankInfo.innerHTML = `
+                    <strong>${bank.shortName || bank.code}</strong> - BIN: ${bank.bin}
+                `;
+                bankInfo.style.display = 'block';
+                
+                // Hide suggestions
+                this.hideBankSuggestions();
+                
+                // Generate QR
+                this.generateBankQR();
+            }
+
+            clearBankSelection() {
+                this.selectedBank = null;
+                document.getElementById('bankSearchInput').classList.remove('has-selection');
+                document.getElementById('bankInfo').style.display = 'none';
+                this.generateBankQR();
+            }
+
+            hideBankSuggestions() {
+                document.getElementById('bankSuggestions').style.display = 'none';
+                this.highlightedIndex = -1;
+            }
+
+            async loadBanks() {
+                try {
+                    const response = await fetch(`${this.vietQRApiBase}/banks`);
+                    const data = await response.json();
+                    
+                    if (data.code === "00" && data.data) {
+                        this.banks = data.data.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+                        
+                        // Update search placeholder
+                        document.getElementById('bankSearchInput').placeholder = 
+                            `Tìm trong ${this.banks.length} ngân hàng (VietinBank, BIDV, MB...)`;
+                    } else {
+                        throw new Error('Invalid response from VietQR API');
+                    }
+                } catch (error) {
+                    this.showError('Không thể tải danh sách ngân hàng. Sử dụng danh sách mặc định.', 'bankError');
+                    this.loadDefaultBanks();
+                }
+            }
+
+            loadDefaultBanks() {
+                this.banks = [
+                    { id: 1, name: "Ngân hàng TMCP Công thương Việt Nam", code: "ICB", bin: "970415", shortName: "VietinBank" },
+                    { id: 2, name: "Ngân hàng TMCP Quân đội", code: "MB", bin: "970422", shortName: "MB Bank" },
+                    { id: 3, name: "Ngân hàng TMCP Ngoại thương Việt Nam", code: "VCB", bin: "970436", shortName: "Vietcombank" },
+                    { id: 4, name: "Ngân hàng TMCP Đầu tư và Phát triển Việt Nam", code: "BIDV", bin: "970418", shortName: "BIDV" },
+                    { id: 5, name: "Ngân hàng Nông nghiệp và Phát triển Nông thôn Việt Nam", code: "VBA", bin: "970405", shortName: "Agribank" }
+                ];
+                
+                document.getElementById('bankSearchInput').placeholder = 
+                    `Tìm trong ${this.banks.length} ngân hàng (VietinBank, BIDV, MB...)`;
+            }
+
+            setQRType(element) {
+                document.querySelectorAll('.qr-type-option').forEach(o => o.classList.remove('active'));
+                element.classList.add('active');
+                this.currentBankQRType = element.dataset.type;
+                this.generateBankQR();
+            }
+
+            setTemplate(element) {
+                document.querySelectorAll('.template-option').forEach(o => o.classList.remove('active'));
+                element.classList.add('active');
+                this.currentTemplate = element.dataset.template;
+                this.generateBankQR();
+            }
+
+            switchTab(tabName) {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                
+                document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+                document.getElementById(tabName).classList.add('active');
+                
+                this.generateQR();
+            }
+
+            setFormat(element) {
+                document.querySelectorAll('.format-option').forEach(o => o.classList.remove('active'));
+                element.classList.add('active');
+                this.currentFormat = element.dataset.format;
+            }
+
+            getActiveTabData() {
+                const activeTab = document.querySelector('.tab.active').dataset.tab;
+                
+                switch(activeTab) {
+                    case 'text':
+                        return document.getElementById('textInput').value.trim();
+                    
+                    case 'url':
+                        return document.getElementById('urlInput').value.trim();
+                    
+                    case 'wifi':
+                        const ssid = document.getElementById('wifiSSID').value.trim();
+                        const pass = document.getElementById('wifiPassword').value.trim();
+                        const sec = document.getElementById('wifiSecurity').value;
+                        if (!ssid) return '';
+                        return sec === 'nopass' ? `WIFI:T:nopass;S:${ssid};;` : `WIFI:T:${sec};S:${ssid};P:${pass};;`;
+                    
+                    case 'contact':
+                        const name = document.getElementById('contactName').value.trim();
+                        const phone = document.getElementById('contactPhone').value.trim();
+                        const email = document.getElementById('contactEmail').value.trim();
+                        if (!name && !phone && !email) return '';
+                        return `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nTEL:${phone}\nEMAIL:${email}\nEND:VCARD`;
+                    
+                    case 'bank':
+                        // Nếu là tab bank và chọn QR thường (không phải Deeplink) hoặc API lỗi thì sử dụng manual code
+                        if (this.currentBankQRType === 'qr' && this.selectedBank) {
+                            const account = document.getElementById('bankAccount').value.trim();
+                            const name = document.getElementById('bankName').value.trim();
+                            const amountStr = document.getElementById('bankAmount').value.replace(/[^\d]/g, '');
+                            const memo = document.getElementById('bankMemo').value.trim();
+
+                            if (account && name) {
+                                return this.createManualVietQR(this.selectedBank.bin, account, name, amountStr, memo);
+                            }
+                            return '';
+                        }
+                        return '';
+                    
+                    default:
+                        return '';
+                }
+            }
+
+            async generateBankQR() {
+                const account = document.getElementById('bankAccount').value.trim();
+                const name = document.getElementById('bankName').value.trim();
+                const amountStr = document.getElementById('bankAmount').value.replace(/[^\d]/g, '');
+                const memo = document.getElementById('bankMemo').value.trim();
+
+                this.hideError('bankError');
+                document.getElementById('bankSuccess').style.display = 'none';
+                this.currentBankQRData = null;
+
+                if (!this.selectedBank || !account || !name) {
+                    if ((account || name) && !this.selectedBank) {
+                         this.showError('Vui lòng chọn ngân hàng từ danh sách gợi ý', 'bankError');
+                    } else if (this.selectedBank && (!account || !name)) {
+                        this.showError('Vui lòng điền đầy đủ: Số tài khoản và Tên chủ TK', 'bankError');
+                    } else {
+                        this.generateQR();
+                    }
+                    return;
+                }
+
+                if (!/^\d+$/.test(account) || account.length < 6 || account.length > 20) {
+                    this.showError('Số tài khoản không hợp lệ (6-20 chữ số)', 'bankError');
+                    this.generateQR();
+                    return;
+                }
+
+                if (name.length < 2) {
+                    this.showError('Tên chủ tài khoản quá ngắn', 'bankError');
+                    this.generateQR();
+                    return;
+                }
+                
+                // Nếu là QR thường, tạo QR thủ công và dừng lại (do API tốn chi phí và phức tạp hơn)
+                if (this.currentBankQRType === 'qr') {
+                    this.currentBankQRData = this.createManualVietQR(this.selectedBank.bin, account, name, amountStr, memo);
+                    this.generateQR();
+                    this.showSuccess(`Đã tạo QR ${this.selectedBank.shortName || this.selectedBank.code} (Thường) thành công!`, 'bankSuccess');
+                    return;
+                }
+
+                // Logic gọi API (Giữ nguyên để tạo image từ API nếu cần)
+                this.showBankLoading();
+                try {
+                    const payload = {
+                        accountNo: account,
+                        accountName: name,
+                        acqId: this.selectedBank.bin,
+                        amount: amountStr || 0,
+                        addInfo: memo || '',
+                        format: 'base64', // Dùng base64 để hiển thị ảnh từ API
+                        template: this.currentTemplate
+                    };
+
+                    const response = await fetch(`${this.vietQRApiBase}/generate`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.code === "00" && result.data && result.data.qrDataURL) {
+                        this.currentBankQRData = result.data.qrCode;
+                        this.displayVietQRImage(result.data.qrDataURL);
+                        this.showSuccess(`Đã tạo QR ${this.selectedBank.shortName || this.selectedBank.code} (API) thành công!`, 'bankSuccess');
+                    } else {
+                        throw new Error(result.desc || 'API returned error or missing image data');
+                    }
+
+                } catch (error) {
+                    this.showError('Lỗi API VietQR. Đang chuyển sang tạo QR thủ công.', 'bankError');
+                    
+                    // Fallback to manual generation
+                    this.currentBankQRData = this.createManualVietQR(this.selectedBank.bin, account, name, amountStr, memo);
+                    this.generateQR();
+                }
+            }
+
+            showBankLoading() {
+                const placeholder = document.getElementById('placeholder');
+                placeholder.style.display = 'flex';
+                placeholder.innerHTML = `
+                    <div class="loading"></div>
+                    <div style="font-size: 14px;">Đang tạo QR ${this.selectedBank ? this.selectedBank.shortName || this.selectedBank.code : 'ngân hàng'}...</div>
+                `;
+                document.getElementById('qrcode').innerHTML = '';
+                this.disableButtons();
+            }
+
+            displayVietQRImage(imageUrl) {
+                const qrcode = document.getElementById('qrcode');
+                const placeholder = document.getElementById('placeholder');
+                
+                placeholder.style.display = 'none';
+                qrcode.innerHTML = `
+                    <div style="background: var(--white); padding: 15px; border-radius: var(--radius-default); display: inline-block; box-shadow: var(--shadow-light); border: 1px solid var(--border-color);">
+                        <img src="${imageUrl}" alt="VietQR Code" style="max-width: ${this.currentSize}px; height: auto; border-radius: var(--radius-small);" />
+                    </div>
+                `;
+                
+                this.enableButtons();
+            }
+
+            createManualVietQR(bankBin, account, name, amount, memo) {
+                // Giữ nguyên logic tính toán mã QR thủ công (tối)
+                const normalizedName = this.removeVietnameseAccents(name).toUpperCase();
+                const normalizedMemo = memo ? this.removeVietnameseAccents(memo) : '';
+
+                let qrString = '';
+                qrString += '000201';
+                qrString += '010212';
+                
+                const guid = 'A000000727';
+                let merchantAccount = '0010' + guid;
+                merchantAccount += '01' + String(bankBin.length).padStart(2, '0') + bankBin;
+                merchantAccount += '02' + String(account.length).padStart(2, '0') + account;
+                
+                qrString += '38' + String(merchantAccount.length).padStart(2, '0') + merchantAccount;
+                qrString += '52040000';
+                qrString += '5303704';
+                
+                if (amount && amount !== '0') {
+                    qrString += '54' + String(amount.length).padStart(2, '0') + amount;
+                }
+                
+                qrString += '5802VN';
+                qrString += '59' + String(normalizedName.length).padStart(2, '0') + normalizedName;
+                
+                if (normalizedMemo) {
+                    const additionalData = '08' + String(normalizedMemo.length).padStart(2, '0') + normalizedMemo;
+                    qrString += '62' + String(additionalData.length).padStart(2, '0') + additionalData;
+                }
+                
+                qrString += '6304';
+                const crc = this.calculateCRC16(qrString);
+                qrString += crc.toString(16).toUpperCase().padStart(4, '0');
+                
+                return qrString;
+            }
+
+            removeVietnameseAccents(str) {
+                return str
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/đ/g, 'd')
+                    .replace(/Đ/g, 'D')
+                    .replace(/[^a-zA-Z0-9\s]/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+            }
+
+            calculateCRC16(data) {
+                let crc = 0xFFFF;
+                const polynomial = 0x1021;
+                
+                for (let i = 0; i < data.length; i++) {
+                    crc ^= (data.charCodeAt(i) << 8);
+                    for (let j = 0; j < 8; j++) {
+                        if (crc & 0x8000) {
+                            crc = (crc << 1) ^ polynomial;
+                        } else {
+                            crc <<= 1;
+                        }
+                        crc &= 0xFFFF;
+                    }
+                }
+                
+                return crc;
+            }
+
+            generateQR() {
+                const data = this.getActiveTabData();
+                
+                if (!data) {
+                    this.showPlaceholder();
+                    return;
+                }
+
+                // Nếu đang ở tab bank và hiển thị ảnh API, không generate lại
+                if (document.querySelector('.tab.active').dataset.tab === 'bank' && 
+                    document.getElementById('qrcode').querySelector('img')) {
+                    return;
+                }
+
+                try {
+                    // Xóa ảnh API nếu có
+                    document.getElementById('qrcode').innerHTML = ''; 
+
+                    const qr = qrcode(0, 'M');
+                    qr.addData(data);
+                    qr.make();
+                    
+                    this.currentQR = qr;
+                    this.renderQR(qr);
+                    this.enableButtons();
+                    this.hidePlaceholder();
+                    this.hideError();
+                    
+                } catch (error) {
+                    this.showError('Lỗi tạo mã QR: Dữ liệu quá lớn hoặc không hợp lệ.');
+                    this.showPlaceholder();
+                }
+            }
+
+            renderQR(qr) {
+                const moduleCount = qr.getModuleCount();
+                const cellSize = Math.floor(this.currentSize / moduleCount);
+                const actualSize = cellSize * moduleCount;
+                
+                let html = `<div style="background: var(--white); padding: 15px; border-radius: var(--radius-default); display: inline-block; box-shadow: var(--shadow-light); border: 1px solid var(--border-color);">`;
+                html += `<div style="font-size: 0; line-height: 0; width: ${actualSize}px; height: ${actualSize}px;">`;
+                
+                for (let row = 0; row < moduleCount; row++) {
+                    for (let col = 0; col < moduleCount; col++) {
+                        const color = qr.isDark(row, col) ? '#000000' : '#ffffff';
+                        html += `<div style="display: inline-block; width: ${cellSize}px; height: ${cellSize}px; background: ${color};"></div>`;
+                    }
+                    html += '<br>';
+                }
+                
+                html += '</div></div>';
+                document.getElementById('qrcode').innerHTML = html;
+            }
+
+            showPlaceholder() {
+                document.getElementById('placeholder').style.display = 'flex';
+                document.getElementById('placeholder').innerHTML = `
+                    <i class="fas fa-qrcode" style="font-size: 36px;"></i>
+                    <div style="font-size: 15px;">Nhập dữ liệu để tạo QR</div>
+                `;
+                document.getElementById('qrcode').innerHTML = '';
+                this.disableButtons();
+            }
+
+            hidePlaceholder() {
+                document.getElementById('placeholder').style.display = 'none';
+            }
+
+            enableButtons() {
+                document.getElementById('copyBtn').disabled = false;
+                document.getElementById('downloadBtn').disabled = false;
+            }
+
+            disableButtons() {
+                document.getElementById('copyBtn').disabled = true;
+                document.getElementById('downloadBtn').disabled = true;
+            }
+
+            async copyQR() {
+                try {
+                    const qrElement = document.getElementById('qrcode');
+                    const img = qrElement.querySelector('img');
+                    
+                    if (img) {
+                        // Copy VietQR API image
+                        const response = await fetch(img.src);
+                        const blob = await response.blob();
+                        await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+                    } else if (this.currentQR) {
+                        // Copy generated QR
+                        const canvas = this.createCanvas();
+                        canvas.toBlob(async (blob) => {
+                            await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+                        }, 'image/png');
+                    }
+                    
+                    this.showSuccess('Đã copy QR code vào clipboard!');
+                } catch (error) {
+                    this.showError('Lỗi copy QR code');
+                }
+            }
+
+            downloadQR() {
+                const qrElement = document.getElementById('qrcode');
+                const img = qrElement.querySelector('img');
+                
+                if (img) {
+                    // Download VietQR API image
+                    const link = document.createElement('a');
+                    link.href = img.src;
+                    link.download = `vietqr-${this.selectedBank ? this.selectedBank.code : 'bank'}-${Date.now()}.png`;
+                    link.click();
+                } else if (this.currentQR) {
+                    // Download generated QR
+                    if (this.currentFormat === 'svg') {
+                        this.downloadSVG();
+                    } else {
+                        this.downloadCanvas();
+                    }
+                }
+            }
+
+            createCanvas() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const moduleCount = this.currentQR.getModuleCount();
+                const cellSize = 8; // Tăng kích thước cell để ảnh có độ phân giải cao hơn
+                const padding = 20;
+                
+                canvas.width = canvas.height = (moduleCount * cellSize) + (padding * 2);
+                
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#000000';
+                for (let row = 0; row < moduleCount; row++) {
+                    for (let col = 0; col < moduleCount; col++) {
+                        if (this.currentQR.isDark(row, col)) {
+                            ctx.fillRect(
+                                padding + (col * cellSize), 
+                                padding + (row * cellSize), 
+                                cellSize, 
+                                cellSize
+                            );
+                        }
+                    }
+                }
+                
+                return canvas;
+            }
+
+            downloadCanvas() {
+                const canvas = this.createCanvas();
+                const link = document.createElement('a');
+                const timestamp = new Date().getTime();
+                link.download = `qrcode-${timestamp}.${this.currentFormat}`;
+                link.href = canvas.toDataURL(`image/${this.currentFormat === 'jpg' ? 'jpeg' : 'png'}`, 0.95);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            downloadSVG() {
+                const moduleCount = this.currentQR.getModuleCount();
+                const cellSize = 8;
+                const padding = 20;
+                const size = (moduleCount * cellSize) + (padding * 2);
+                
+                let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">`;
+                svg += `<rect width="${size}" height="${size}" fill="white"/>`;
+                
+                for (let row = 0; row < moduleCount; row++) {
+                    for (let col = 0; col < moduleCount; col++) {
+                        if (this.currentQR.isDark(row, col)) {
+                            const x = padding + (col * cellSize);
+                            const y = padding + (row * cellSize);
+                            svg += `<rect x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" fill="black"/>`;
+                        }
+                    }
+                }
+                
+                svg += '</svg>';
+                
+                const blob = new Blob([svg], { type: 'image/svg+xml' });
+                const link = document.createElement('a');
+                const timestamp = new Date().getTime();
+                link.download = `qrcode-${timestamp}.svg`;
+                link.href = URL.createObjectURL(blob);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+            }
+
+            showError(message, elementId = 'error') {
+                const el = document.getElementById(elementId);
+                el.textContent = message;
+                el.style.display = 'block';
+                setTimeout(() => el.style.display = 'none', 7000);
+            }
+
+            showSuccess(message, elementId = 'success') {
+                const el = document.getElementById(elementId);
+                el.textContent = message;
+                el.style.display = 'block';
+                setTimeout(() => el.style.display = 'none', 4000);
+            }
+
+            hideError(elementId = 'error') {
+                document.getElementById(elementId).style.display = 'none';
+            }
+        }
+
+        // Initialize app when DOM is loaded
+        let qrApp;
+        document.addEventListener('DOMContentLoaded', () => {
+            qrApp = new QRApp();
+        });
+    </script>
+</body>
+</html>
