@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Generator - Giao Diện Hoàn Hảo</title>
+    <title>QR Code Generator</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <style>
@@ -11,11 +11,11 @@
         /* 1. CSS VARIABLES & RESET */
         /* ======================================= */
         :root {
-            --primary-color: #4a55e0; /* Màu xanh tím hiện đại */
+            --primary-color: #4a55e0;
             --primary-light: #6a74f7;
             --primary-dark: #3a41c2;
-            --accent-color: #28a745; /* Màu xanh lá cho nút copy */
-            --background-gradient: linear-gradient(135deg, #a7b7ff 0%, #4a55e0 100%); /* Nền gradient nhẹ nhàng */
+            --accent-color: #28a745; 
+            --background-gradient: linear-gradient(135deg, #a7b7ff 0%, #4a55e0 100%); 
             --text-color: #1e293b;
             --sub-text-color: #64748b;
             --bg-card: #ffffff;
@@ -34,6 +34,7 @@
             padding: 30px 15px; 
             color: var(--text-color);
             line-height: 1.6;
+            overflow-x: hidden; /* FIX CHÍNH: Ngăn lỗi tràn ngang */
         }
         .container { 
             max-width: 1100px; 
@@ -63,7 +64,7 @@
 
         .main-content { 
             display: grid; 
-            grid-template-columns: 3fr 2fr; /* Tăng tỷ lệ input (3) so với output (2) để cân đối hơn */
+            grid-template-columns: 3fr 2fr; 
             gap: 40px; 
             align-items: flex-start;
         }
@@ -73,6 +74,9 @@
             border-radius: var(--radius-large); 
             box-shadow: var(--shadow-strong); 
             transition: all 0.3s ease;
+            /* Giảm thiểu padding ngang để tránh tràn trên mobile, sẽ điều chỉnh lại trong media query */
+            padding-left: 20px;
+            padding-right: 20px;
         }
 
         /* ======================================= */
@@ -84,8 +88,9 @@
             border-radius: var(--radius-default); 
             padding: 4px; 
             margin-bottom: 25px; 
-            overflow-x: auto; 
+            overflow-x: auto; /* Cho phép cuộn ngang */
             white-space: nowrap; 
+            -webkit-overflow-scrolling: touch;
         }
         .tab { 
             flex-shrink: 0; 
@@ -106,10 +111,6 @@
             color: var(--bg-card); 
             box-shadow: 0 4px 10px rgba(74, 85, 224, 0.4);
         }
-        .tab:hover:not(.active) {
-            background: #e0e7ff;
-            color: var(--primary-dark);
-        }
         
         .tab-content { display: none; }
         .tab-content.active { display: block; }
@@ -128,14 +129,18 @@
             border: 1px solid var(--border-color); 
             border-radius: var(--radius-default); 
             font-size: 16px; 
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { 
+            outline: none; 
+            border-color: var(--primary-color); 
+            box-shadow: 0 0 0 3px rgba(74, 85, 224, 0.2);
         }
         .bank-grid { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
             gap: 20px;
         }
-
-        /* Bank Search Styling */
         .bank-search-container { position: relative; }
         .bank-search-input { padding-right: 45px !important; }
         .bank-search-icon { 
@@ -144,23 +149,13 @@
         }
         .bank-info { 
             font-size: 13px; 
-            color: #475569; 
             padding: 10px 15px; 
             background: #f0f4ff; 
             border-radius: var(--radius-default);
             border-left: 4px solid var(--primary-color);
             margin-top: 10px;
         }
-        .bank-suggestions { 
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-            border-radius: var(--radius-default);
-        }
-        .bank-suggestion { 
-            padding: 12px 15px; 
-            font-size: 14px;
-        }
         
-        /* QR Type Selector - Dùng Grid để cân đối hơn */
         .qr-type-selector { 
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -189,7 +184,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 30px 20px; /* Giảm padding ngang cho khối output */
+            padding: 30px 20px; 
         }
 
         .qr-display { 
@@ -218,13 +213,12 @@
 
         .controls { 
             width: 100%;
-            max-width: 350px; /* Giới hạn chiều rộng controls để cân đối với QR */
+            max-width: 350px; 
             display: flex; 
             flex-direction: column; 
             gap: 15px; 
         }
         
-        /* Size Control - Gọn gàng hơn */
         .size-control { 
             display: flex; 
             align-items: center; 
@@ -243,7 +237,6 @@
             font-size: 13px; 
         }
 
-        /* Format Options - Gọn gàng hơn */
         .format-options { 
             display: grid; 
             grid-template-columns: repeat(3, 1fr); 
@@ -257,53 +250,61 @@
             font-weight: 600;
         }
 
-        /* Buttons - Nổi bật hơn */
         .btn { 
             padding: 14px; 
+            border: none;
+            color: var(--bg-card);
             border-radius: var(--radius-default); 
+            font-weight: 700;
             font-size: 16px; 
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: all 0.3s;
         }
-        .copy-btn { 
-            background: var(--accent-color); 
-        }
-        .download-btn { 
-            background: var(--primary-color); 
-        }
+        .copy-btn { background: var(--accent-color); }
+        .download-btn { background: var(--primary-color); }
         
         /* ======================================= */
-        /* 5. FOOTER & ALERTS */
-        /* ======================================= */
-        .footer { 
-            background: rgba(255, 255, 255, 0.2); 
-            backdrop-filter: blur(5px); 
-            border-radius: var(--radius-large); 
-            color: var(--bg-card); 
-            padding: 20px; 
-        }
-
-        /* ======================================= */
-        /* 6. RESPONSIVE (Cho Mobile và Tablet) */
+        /* 5. RESPONSIVE (Cho Mobile và Tablet) */
         /* ======================================= */
         @media (max-width: 992px) {
             .main-content { 
-                grid-template-columns: 1fr; /* Chuyển sang 1 cột trên Tablet/Mobile */
+                grid-template-columns: 1fr;
                 gap: 20px;
             }
             .header h1 { font-size: 2.2rem; }
-            .section { padding: 25px; }
-            .qr-output-section { order: -1; } /* Đưa khối QR lên trên cùng */
+            .section { 
+                padding: 25px; /* Điều chỉnh lại padding cho Tablet */
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+            .qr-output-section { order: -1; }
             .controls { max-width: none; }
         }
 
         @media (max-width: 576px) {
-            body { padding: 15px 10px; }
+            body { padding: 15px 5px; } /* Giảm padding ngang body tối đa */
             .header h1 { font-size: 1.8rem; }
+            .section { 
+                padding: 15px; /* Giảm padding khối section */
+            }
             .tabs { padding: 2px; }
-            .tab { font-size: 12px; padding: 8px 10px; }
+            .tab { 
+                font-size: 11px; /* Giảm font tab */
+                padding: 8px 8px; /* Giảm padding tab */
+            }
             .bank-grid { grid-template-columns: 1fr; gap: 10px;}
-            .qr-placeholder { width: 200px; height: 200px; }
-            #qrcode { min-height: 200px; }
-            .btn { font-size: 14px; padding: 12px; }
+            .qr-placeholder { 
+                width: 200px; 
+                height: 200px; 
+            }
+            #qrcode { 
+                min-height: 200px;
+            }
+            .btn { 
+                font-size: 14px; 
+                padding: 12px; 
+            }
         }
     </style>
 </head>
@@ -847,7 +848,7 @@
                         amount: amountStr || 0,
                         addInfo: memo || '',
                         format: 'base64', 
-                        template: 'compact' // Dùng template mặc định khi gọi API
+                        template: 'compact' 
                     };
 
                     const response = await fetch(`${this.vietQRApiBase}/generate`, {
@@ -1016,8 +1017,9 @@
             }
 
             showPlaceholder() {
-                document.getElementById('placeholder').style.display = 'flex';
-                document.getElementById('placeholder').innerHTML = `
+                const placeholder = document.getElementById('placeholder');
+                placeholder.style.display = 'flex';
+                placeholder.innerHTML = `
                     <i class="fas fa-qrcode" style="font-size: 40px;"></i>
                     <div style="font-size: 16px; font-weight: 600;">Nhập dữ liệu để tạo QR</div>
                 `;
